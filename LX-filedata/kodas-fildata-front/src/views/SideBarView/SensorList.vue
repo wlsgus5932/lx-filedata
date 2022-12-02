@@ -287,6 +287,7 @@ export default {
     },
 
     downloadZip(data) {
+      console.log('test');
       this.hideModal();
       this.circularContent = '파일을 압축중입니다...';
       this.circularModal = true;
