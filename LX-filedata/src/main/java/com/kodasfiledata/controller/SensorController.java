@@ -25,6 +25,7 @@ public class SensorController {
 		System.out.println(param.toString());
 		List<Sensor> list = service.getSensorList(param);
 		System.out.println(list.toString());
+		System.out.println("springboot test");
 		if(list == null || list.isEmpty()) {
 			return null;
 		} else {
