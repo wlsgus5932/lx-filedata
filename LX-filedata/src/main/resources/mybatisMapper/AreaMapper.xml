@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd%22%3E%22%3E">
+  
+  <mapper namespace="com.kodasfiledata.dao.AreaDao">
+  
+  	<resultMap id="AreaResultMap" type="com.kodasfiledata.entity.Area">
+		<result property="area" column="OPRT_AREA_NM" />
+	</resultMap>
+	
+	<sql id="select">
+		SELECT OPRT_AREA_NM FROM OPN.VKD0191
+	</sql>
+
+	<select id="getArea" resultMap="AreaResultMap">
+        <include refid="select"/>
+	</select>
+</mapper>

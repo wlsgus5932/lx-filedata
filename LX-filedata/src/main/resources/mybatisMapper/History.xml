@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kodasfiledata.dao.HistoryDao">
+	<insert id="setHistoryList" parameterType="com.kodasfiledata.parameter.HistoryParameter" >
+		INSERT INTO OPN.TCO0003 (
+			STATS_TOT_DT
+			, INST_CD
+			, DATA_FORM_NM
+			, LIST_NM
+			, CL_STRC_NM
+			, UTLZ_USER_ID
+			, UTLZ_APLY_NCNT
+			, FRST_RGST_PGM_ID
+			, FRST_RGST_DTM
+			, LAST_RGST_PGM_ID
+			, LAST_RGST_DTM
+			, DATA_NM
+		)
+		VALUES
+			<foreach collection="dataName" item="item" separator=",">
+			(
+			TO_CHAR(SYSDATE, 'YYYYMMDD')
+			, 'B553501'
+			, '파일데이터'
+			, #{listName}
+			, '과학기술 - 과학기술진흥'
+			, #{userId}
+			, 1
+			, 'SYSTEM'
+			, SYSDATE
+			, 'SYSTEM'
+			, SYSDATE
+			,
+			#{item}
+		)
+			</foreach>
+	</insert>
+</mapper>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd%22%3E%22%3E">
+  
+<mapper namespace="com.kodasfiledata.dao.LearningDao">
+
+	<select id="getLearningList" parameterType="com.kodasfiledata.parameter.LearningParameter" resultType="com.kodasfiledata.entity.Learning">
+		SELECT *
+		FROM (	
+		SELECT 
+		(ROW_NUMBER() OVER (ORDER BY A.OPRT_YMD, A.OPRT_TM )) AS RowNumber,
+		A.*
+	FROM OPN.VKD0102 A
+			<where>
+				<if test="environment1 != null and environment1 != '' and environment2 == null and environment2 == ''">
+					<choose>
+	 				<when test="'일반도로'.equals(environment1)">
+						AND A.TEST_ENVR_DSCD NOT LIKE '%C00600017%'
+					</when>
+					<otherwise>
+					 	AND A.TEST_ENVR_DSCD LIKE '%C00600017%'
+					</otherwise>
+				</choose>
+				</if>
+				<if test="environment2 != null and environment2 != ''">
+					<foreach item="environment2" index="index" collection="environment2" open="(" separator="or" close=")">
+						A.TEST_ENVR_DSCD = #{environment2}
+					</foreach>
+				</if>
+				<if test="startDate != null and startDate!= '' and endDate != null and endDate != ''">
+					AND A.OPRT_YMD BETWEEN #{startDate} AND #{endDate}
+				</if>
+				<if test="location != null and location != ''">
+					AND A.OPRT_AREA_NM LIKE '%' || #{location} || '%'
+				</if>
+				<if test="sunlight != null and sunlight != ''">
+					AND A.ILMN_CL_NM = #{sunlight}
+				</if>
+				<if test="lowVelocity != null and lowVelocity > 0 and highVelocity != null and highVelocity > 0">
+					AND A.OPRT_SPED_VAL BETWEEN #{lowVelocity} AND #{highVelocity}
+				</if>
+				<if test="weather != null and weather != ''">
+					AND WTHR_DS_NM = #{weather}
+				</if>
+				<if test="conditions != null and conditions != ''">
+					AND A.ROAD_CRCM_CLCD = #{conditions}
+				</if>
+				<if test="person != null and person != ''">
+					AND HUMN_GRUP_CNT <![CDATA[>]]> 0
+				</if>
+ 				<if test="car != null and car != ''">
+					AND PASG_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="truck != null and truck != ''">
+					AND TRCK_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="bus != null and bus != ''">
+					AND BUS_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="specialCar != null and specialCar != ''">
+					AND SPAC_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="motorCycle != null and motorCycle != ''">
+					AND MTCY_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="senTp != null and senTp != ''">
+					AND SEN_TP = #{senTp}
+				</if>
+				<if test="pstnNo != null and pstnNo != ''">
+					AND PSTN_NO = #{pstnNo}
+				</if>
+				<if test="stopLine != null and stopLine != ''">
+					AND SPLE_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="crossWalk != null and crossWalk != ''">
+					AND CSWK_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="traffic != null and traffic != ''">
+					AND TLIGT_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="construction != null and construction != ''">
+					AND RK_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="bump != null and bump != ''">
+					AND SDBP_CNT <![CDATA[>]]> 0
+				</if>
+				<if test= "learningType != null and learningType != ''">
+					AND DATA_TYPE = #{learningType}
+				</if>
+				<if test= "learningType2 != null and learningType2 != ''">
+					AND PSTN_NO = #{learningType2}
+				</if>
+					 ) T
+					WHERE T.rownumber &gt; (#{page}-1)*100
+				<choose>
+	 				<when test="countNumber != null and countNumber != ''">
+						AND T.rownumber &lt; = #{countNumber}
+					</when>
+					<otherwise>
+					 	AND T.rownumber &lt; = #{page}*100
+					</otherwise>
+				</choose>
+			</where>
+	</select>
+	
+		<select id="getLearningListTotal" parameterType="com.kodasfiledata.parameter.LearningParameter" resultType="int">
+		SELECT COUNT(*) 
+		FROM OPN.VKD0102 A
+			<where>
+				<if test="environment1 != null and environment1 != '' and environment2 == null and environment2 == ''">
+					<choose>
+	 				<when test="'일반도로'.equals(environment1)">
+						AND A.TEST_ENVR_DSCD NOT LIKE '%C00600017%'
+					</when>
+					<otherwise>
+					 	AND A.TEST_ENVR_DSCD LIKE '%C00600017%'
+					</otherwise>
+				</choose>
+				</if>
+				<if test="environment2 != null and environment2 != ''">
+					<foreach item="environment2" index="index" collection="environment2" open="(" separator="or" close=")">
+						A.TEST_ENVR_DSCD = #{environment2}
+					</foreach>
+				</if>
+				<if test="startDate != null and startDate!= '' and endDate != null and endDate != ''">
+					AND A.OPRT_YMD BETWEEN #{startDate} AND #{endDate}
+				</if>
+				<if test="location != null and location != ''">
+					AND A.OPRT_AREA_NM LIKE '%' || #{location} || '%'
+				</if>
+				<if test="sunlight != null and sunlight != ''">
+					AND A.ILMN_CL_NM = #{sunlight}
+				</if>
+				<if test="lowVelocity != null and lowVelocity > 0 and highVelocity != null and highVelocity > 0">
+					AND A.OPRT_SPED_VAL BETWEEN #{lowVelocity} AND #{highVelocity}
+				</if>
+				<if test="weather != null and weather != ''">
+					AND WTHR_DS_NM = #{weather}
+				</if>
+				<if test="conditions != null and conditions != ''">
+					AND A.ROAD_CRCM_CLCD = #{conditions}
+				</if>
+				<if test="person != null and person != ''">
+					AND HUMN_GRUP_CNT <![CDATA[>]]> 0
+				</if>
+ 				<if test="car != null and car != ''">
+					AND PASG_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="truck != null and truck != ''">
+					AND TRCK_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="bus != null and bus != ''">
+					AND BUS_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="specialCar != null and specialCar != ''">
+					AND SPAC_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="motorCycle != null and motorCycle != ''">
+					AND MTCY_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="senTp != null and senTp != ''">
+					AND SEN_TP = #{senTp}
+				</if>
+				<if test="stopLine != null and stopLine != ''">
+					AND SPLE_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="crossWalk != null and crossWalk != ''">
+					AND CSWK_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="traffic != null and traffic != ''">
+					AND TLIGT_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="construction != null and construction != ''">
+					AND RK_CNT <![CDATA[>]]> 0
+				</if>
+				<if test="bump != null and bump != ''">
+					AND SDBP_CNT <![CDATA[>]]> 0
+				</if>
+				<if test= "learningType != null and learningType != ''">
+					AND DATA_TYPE = #{learningType}
+				</if>
+				<if test= "learningType2 != null and learningType2 != ''">
+					AND PSTN_NO = #{learningType2}
+				</if>
+			</where>
+	</select>
+	</mapper>

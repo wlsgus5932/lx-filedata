@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd%22%3E%22%3E">
+  
+<mapper namespace="com.kodasfiledata.dao.SensorDao">
+
+	<select id="getSensorList" parameterType="com.kodasfiledata.parameter.SensorParameter" resultType="com.kodasfiledata.entity.Sensor">
+		SELECT * FROM (	
+			SELECT
+				(ROW_NUMBER() OVER (ORDER BY DBMS_RANDOM.RANDOM )) AS RowNumber,
+				COUNT(*) OVER() AS total_count,
+				A.* 
+			FROM OPN.TEST01 A 
+			<where>
+				<if test="startDate != null and startDate!= '' and endDate != null and endDate != ''">
+					AND A.OPRT_YMD BETWEEN #{startDate} AND #{endDate}
+				</if>
+				<if test="location != null and location != ''">
+					AND A.OPRT_AREA_NM LIKE '%' || #{location} || '%'
+				</if>
+				<if test="sunlight != null and sunlight != ''">
+					AND A.ILMN_CL_NM = #{sunlight}
+				</if>
+				<if test="lowVelocity != null and lowVelocity > 0 and highVelocity != null and highVelocity > 0">
+					AND A.OPRT_SPED_VAL BETWEEN #{lowVelocity} AND #{highVelocity}
+				</if>
+				<if test="weather != null and weather != ''">
+					AND WTHR_DS_NM = #{weather}
+				</if>
+				<if test="conditions != null and conditions != ''">
+					AND A.ROAD_CRCM_CLCD = #{conditions}
+				</if>
+				<if test="sensorType1 != null and sensorType1 != ''">
+					AND SEN_TP = #{sensorType1}
+				</if>
+				<if test="sensorType2 != null and sensorType2 != ''">
+					AND PSTN_NO = #{sensorType2}
+				</if>
+			</where>
+				 	) T
+				 <if test="page != null and page != ''">
+					WHERE T.rownumber &gt; (#{page}-1)*50 AND T.rownumber &lt; = #{page}*50
+				 </if>
+		</select>
+		
+		<select id="getSensorSectionList" parameterType="com.kodasfiledata.parameter.SensorParameter" resultType="com.kodasfiledata.entity.Sensor">
+		SELECT * FROM (	
+			SELECT
+				(ROW_NUMBER() OVER (ORDER BY OPRT_YMD )) AS RowNumber,
+				A.* 
+			FROM OPN.TEST01 A 
+			<where>
+				<if test="startDate != null and startDate!= '' and endDate != null and endDate != ''">
+					AND A.OPRT_YMD BETWEEN #{startDate} AND #{endDate}
+				</if>
+				<if test="location != null and location != ''">
+					AND A.OPRT_AREA_NM LIKE '%' || #{location} || '%'
+				</if>
+				<if test="sunlight != null and sunlight != ''">
+					AND A.ILMN_CL_NM = #{sunlight}
+				</if>
+				<if test="lowVelocity != null and lowVelocity > 0 and highVelocity != null and highVelocity > 0">
+					AND A.OPRT_SPED_VAL BETWEEN #{lowVelocity} AND #{highVelocity}
+				</if>
+				<if test="weather != null and weather != ''">
+					AND WTHR_DS_NM = #{weather}
+				</if>
+				<if test="conditions != null and conditions != ''">
+					AND A.ROAD_CRCM_CLCD = #{conditions}
+				</if>
+				<if test="sensorType1 != null and sensorType1 != ''">
+					AND SEN_TP = #{sensorType1}
+				</if>
+				<if test="sensorType2 != null and sensorType2 != ''">
+					AND PSTN_NO = #{sensorType2}
+				</if>
+			</where>
+				 	) T
+				 <if test="startNumber != null and startNumber != '' and endNumber != null and endNumber != null">
+					WHERE T.rownumber &gt;= #{startNumber} AND T.rownumber &lt;= #{endNumber}
+				 </if>
+		</select>
+		
+		<select id="getSensorRandomList" parameterType="com.kodasfiledata.parameter.SensorParameter" resultType="com.kodasfiledata.entity.Sensor">
+		SELECT * FROM (	
+			SELECT
+				(ROW_NUMBER() OVER (ORDER BY OPRT_YMD )) AS RowNumber,
+				A.* 
+			FROM OPN.TEST01 A 
+			<where>
+				<if test="startDate != null and startDate!= '' and endDate != null and endDate != ''">
+					AND A.OPRT_YMD BETWEEN #{startDate} AND #{endDate}
+				</if>
+				<if test="location != null and location != ''">
+					AND A.OPRT_AREA_NM LIKE '%' || #{location} || '%'
+				</if>
+				<if test="sunlight != null and sunlight != ''">
+					AND A.ILMN_CL_NM = #{sunlight}
+				</if>
+				<if test="lowVelocity != null and lowVelocity > 0 and highVelocity != null and highVelocity > 0">
+					AND A.OPRT_SPED_VAL BETWEEN #{lowVelocity} AND #{highVelocity}
+				</if>
+				<if test="weather != null and weather != ''">
+					AND WTHR_DS_NM = #{weather}
+				</if>
+				<if test="conditions != null and conditions != ''">
+					AND A.ROAD_CRCM_CLCD = #{conditions}
+				</if>
+				<if test="sensorType1 != null and sensorType1 != ''">
+					AND SEN_TP = #{sensorType1}
+				</if>
+				<if test="sensorType2 != null and sensorType2 != ''">
+					AND PSTN_NO = #{sensorType2}
+				</if>
+			</where>
+				 	) T
+				 <if test="randomNumber != null and randomNumber != ''">
+					WHERE T.rownumber &gt; 1 AND T.rownumber &lt; = #{randomNumber}
+				 </if>
+		</select>
+		
+	</mapper>

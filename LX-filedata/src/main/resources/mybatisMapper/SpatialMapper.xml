@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kodasfiledata.dao.SpatialDao">
+	<select id="getSpatialList" parameterType="com.kodasfiledata.parameter.SpatialParameter" resultType="com.kodasfiledata.entity.Spatial">
+		SELECT * 
+		FROM 
+				<if test="indexRatio == '250'">
+					OPN.VKD0017
+				</if>
+				<if test="indexRatio == '1000'">
+					OPN.VKD0007
+				</if>
+					
+				<where>
+  				<if test="indexValue.size != 0 and indexRatio == '1000'">
+					<foreach item="indexValue" index="index" collection="indexValue" open="(" separator="or" close=")">
+						MPFR_INDX_VAL = #{indexValue}
+                    </foreach>
+				</if>
+				<if test="indexValue.size != 0 and indexRatio == '250'">
+					<foreach item="indexValue" index="index" collection="indexValue" open="(" separator="or" close=")">
+						MPFR_INDX_250_VAL = #{indexValue}
+                    </foreach>
+				</if>
+				<if test="location != null and location != ''">
+					AND PHTG_PSTN_NM LIKE '%' || #{location} || '%'
+				</if>
+				<if test="dataType != null and dataType != ''">
+					AND PHTG_DATA_NM = #{dataType}
+				</if>
+				<if test="targetType != null and targetType != ''">
+					AND DATA_TYPE_NM = #{targetType}
+				</if>
+				</where>
+	</select>
+	
+</mapper>
