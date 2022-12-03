@@ -1,10 +1,8 @@
 <template>
   <v-card width="100%">
-    <v-card-title class="text-h5 grey lighten-2">
-      <div>구간 다운로드</div>
-    </v-card-title>
+    <v-card-title class="text-h5 grey lighten-2"> 구간 다운로드 </v-card-title>
     <br />
-    <v-card-text class="font-weight-bold grey--text">
+    <v-card-text class="font-weight-bold">
       <p>
         시작범위와 종료 범위를 입력 후 <br />원하는 데이터의 범위를 설정할 수
         있습니다. <br /><br />파일의 개수 및 사용자의 네트워크 상태에 따라
@@ -41,14 +39,13 @@
           ></v-text-field>
         </v-col>
       </v-row>
-      <v-row>
-        <v-checkbox
-          v-model="section.xlsxCheck"
-          label="데이터를 목록(엑셀 형식)으로 다운로드 받기"
-          color="error"
-          hide-details
-        ></v-checkbox>
-      </v-row>
+      <v-checkbox
+        class="checkbox"
+        v-model="section.xlsx"
+        label="데이터를 목록(엑셀 형식)으로 다운로드 받기"
+        color="primary"
+        hide-details
+      ></v-checkbox>
     </v-card-text>
 
     <v-card-actions>
@@ -90,6 +87,7 @@ export default {
       this.$emit('hide');
       this.section.start = 1;
       this.section.end = 2;
+      this.section.xlsx = false;
     },
     startCheck() {
       let start = Number(this.section.start);
@@ -125,3 +123,13 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+::v-deep .checkbox .v-label {
+  font-size: 12px;
+}
+/* 
+::v-deep .checkbox {
+  margin-left: 10px;
+} */
+</style>

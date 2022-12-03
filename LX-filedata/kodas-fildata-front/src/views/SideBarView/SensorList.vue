@@ -2,12 +2,12 @@
   <div class="sensor-list">
     <div
       v-if="isLoading"
-      style="height: 100%; text-align: center; padding-top: 400px"
+      style="height: 100%; text-align: center; padding-top: 50%"
     >
       <span style="margin-top: 600px">
         <Spinner></Spinner>
       </span>
-      <h4>목록을 가져오는중입니다. <br />잠시만 기다려주세요.</h4>
+      <h3>목록을 검색중입니다.</h3>
     </div>
     <template v-else-if="!isLoading">
       <div class="header">
@@ -287,7 +287,6 @@ export default {
     },
 
     downloadZip(data) {
-      console.log('test');
       this.hideModal();
       this.circularContent = '파일을 압축중입니다...';
       this.circularModal = true;
@@ -382,7 +381,6 @@ export default {
     },
 
     async sectionDownload(section) {
-      console.log('section:::', section);
       this.hideModal();
       this.formParams.startNumber = section.start;
       this.formParams.endNumber = section.end;
@@ -390,7 +388,7 @@ export default {
       this.circularModal = true;
 
       const { data } = await getSensorSectionList(this.formParam);
-      if (section.xslx) {
+      if (!section.xlsx) {
         await this.downloadZip(data);
       } else {
         this.downloadExcel(data);
@@ -399,11 +397,15 @@ export default {
 
     async randomDownload(random) {
       this.hideModal();
-      this.formParams.randomNumber = random;
+      this.formParams.randomNumber = random.randomNum;
       this.circularContent = '압축 할 데이터를 받아오는중입니다...';
       this.circularModal = true;
       const { data } = await getSensorRandomList(this.formParam);
-      await this.downloadZip(data);
+      if (!random.xlsx) {
+        await this.downloadZip(data);
+      } else {
+        this.downloadExcel(data);
+      }
     },
 
     async setHistoryData() {
