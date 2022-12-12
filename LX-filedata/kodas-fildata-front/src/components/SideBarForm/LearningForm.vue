@@ -23,7 +23,7 @@
             prepend-icon="mdi-file-tree"
           ></v-select>
         </v-col>
-        <v-col cols="11" v-if="formParams.learningType == 'SEGMENTATION'">
+        <v-col cols="11" v-if="formParams.learningType">
           <v-select
             :items="learningTypeCodes2"
             item-text="name"
@@ -35,36 +35,97 @@
           ></v-select>
         </v-col>
       </v-card>
+
       <v-card class="cards">
         <v-col cols="11">
           <v-combobox
-            v-model="formParams.move"
+            v-model="moveChange"
             :items="moveItem"
-            item-text="name"
-            item-value="value"
             label="이동체 정보 (OR)"
             multiple
             small-chips
-            right
-            prepend-icon="mdi-car-hatchback"
-          ></v-combobox>
+            prepend-icon="mdi-traffic-light"
+            item-text="name"
+            @change="changeMove"
+          >
+            <template v-slot:selection="{ attrs, item, parent, selected }">
+              <v-chip
+                v-if="item === Object(item)"
+                v-bind="attrs"
+                :input-value="selected"
+                label
+                small
+              >
+                <span class="pr-2">
+                  {{ item.name }}
+                </span>
+                <v-icon small @click="parent.selectItem(item), moveChange()">
+                  $delete
+                </v-icon>
+              </v-chip>
+            </template>
+            <template v-slot:item="{ index, item }">
+              <v-text-field
+                v-if="editing === item"
+                v-model="editing.text"
+                autofocus
+                flat
+                background-color="transparent"
+                hide-details
+                solo
+                @keyup.enter="edit(index, item)"
+              ></v-text-field>
+              <span style="font-size: 14px">{{ item.name }}</span>
+            </template>
+          </v-combobox>
         </v-col>
       </v-card>
 
       <v-card class="cards">
         <v-col cols="11">
           <v-combobox
-            v-model="formParams.fixed"
+            v-model="fixedChange"
             :items="fixedItem"
-            item-text="name"
-            item-value="value"
             label="고정체 정보 (OR)"
             multiple
             small-chips
             prepend-icon="mdi-traffic-light"
-          ></v-combobox>
+            item-text="name"
+            @change="changeFixed"
+          >
+            <template v-slot:selection="{ attrs, item, parent, selected }">
+              <v-chip
+                v-if="item === Object(item)"
+                v-bind="attrs"
+                :input-value="selected"
+                label
+                small
+              >
+                <span class="pr-2">
+                  {{ item.name }}
+                </span>
+                <v-icon small @click="parent.selectItem(item), fixedChange()">
+                  $delete
+                </v-icon>
+              </v-chip>
+            </template>
+            <template v-slot:item="{ index, item }">
+              <v-text-field
+                v-if="editing === item"
+                v-model="editing.text"
+                autofocus
+                flat
+                background-color="transparent"
+                hide-details
+                solo
+                @keyup.enter="edit(index, item)"
+              ></v-text-field>
+              <span style="font-size: 14px">{{ item.name }}</span>
+            </template>
+          </v-combobox>
         </v-col>
       </v-card>
+
       <div style="margin-bottom: 10px">
         <span
           class="secondary--text font-weight-bold text-truncate"
@@ -208,97 +269,96 @@
       <div style="float: right">
         <v-btn
           class="secondary font-weight-bold"
-          @click="searchDialog = true"
+          @click="choiceModal = true"
           style="margin: 10px 0px 50px; width: 100px"
           >검색</v-btn
         >
       </div>
     </div>
     <LearningList
-      v-if="learningListChange"
+      v-if="showLearningList"
       :formParams="formParams"
       :list="learningList"
+      @hide="hideLearningList()"
+      ref="learning"
     ></LearningList>
 
-    <!-- search 다이얼로그 -->
-    <v-dialog v-model="searchDialog" width="800">
-      <v-card width="100%">
-        <v-card-title> 선택한 조건으로 검색하시겠습니까? </v-card-title>
+    <!-- modal zone -->
+    <template class="modal-zone">
+      <v-dialog width="800"> </v-dialog>
 
-        <v-card-text class="font-weight-bold grey--text mb-2">
-          사용자의 네트워크 상태에 따라 소요시간이 길어질 수 있습니다. (평균
-          30초 미만)</v-card-text
+      <v-dialog v-model="choiceModal" width="800">
+        <choiceModal
+          :title="title"
+          :content="content"
+          @submit="(choiceModal = false), submitForm()"
+          @hide="choiceModal = false"
         >
+        </choiceModal>
+      </v-dialog>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
+      <v-dialog v-model="alertModal" persistent width="600" height="200">
+        <alertModal
+          :title="alertTitle"
+          :content="alertContent"
+          @hide="hideModal()"
+        ></alertModal>
+      </v-dialog>
 
-          <v-btn color="green darken-1" text @click="searchDialog = false">
-            취소
-          </v-btn>
-
-          <v-btn
-            color="green darken-1"
-            text
-            @click="
-              (searchDialog = false), (searchDialog2 = true), submitForm(0)
-            "
-          >
-            확인
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog
-      v-model="searchDialog2"
-      width="500"
-      persistent
-      class="justify-center"
-    >
-      <v-card width="100%" height="8%">
-        <v-card-actions>
-          <v-progress-circular
-            :size="30"
-            color="primary"
-            indeterminate
-          ></v-progress-circular>
-
-          <v-card-text class="font-weight-bold grey--text">
-            목록을 가져오는중입니다...
-          </v-card-text>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+      <v-dialog v-model="circularModal" persistent width="500">
+        <circularModal :content="circularContent"></circularModal>
+      </v-dialog>
+    </template>
+    <!-- modal zone end. -->
   </div>
 </template>
 
 <script>
 import datePicker from '@/components/DatePicker/datePicker.vue';
-import { getLearningList } from '@/api/index';
 import Spinner from '@/components/Spinner/Spinner.vue';
 import LearningList from '@/views/SideBarView/LearningList.vue';
+import choiceModal from '../Modal/choiceModal.vue';
+import circularModal from '../../components/Modal/circularModal.vue';
+import alertModal from '../../components/Modal/alertModal.vue';
 
 export default {
-  components: { datePicker, Spinner, LearningList },
+  components: {
+    datePicker,
+    Spinner,
+    LearningList,
+    choiceModal,
+    circularModal,
+    alertModal,
+  },
 
   data() {
     return {
+      editing: '',
+      editingIndex: '',
       isLoading: false,
       btnLoading: false,
       learningList: [],
       searchDialog: false,
       searchDialog2: false,
+
+      showLearningList: false,
+      title: '선택한 조건으로 검색 하시겠습니까?',
+      content: '사용자의 네트워크 상태에 따라 소요시간이 길어질 수 있습니다.',
+      circularContent: '목록을 가져오는중입니다.',
+      alertTitle: '데이터가 없습니다.',
+      alertContent: '검색하신 조건에 맞는 데이터가 없습니다.',
+      choiceModal: false,
+      alertModal: false,
+      circularModal: false,
+
       formParams: {
         startDate: '',
         endDate: '',
         sunlight: '',
         move: '',
-        fixed: '',
+        fixed: [],
         weather: '',
         location: '',
-        sensorType1: '',
-        sensorType2: '',
         learningType: '',
         learningType2: '',
         conditions: '',
@@ -308,8 +368,9 @@ export default {
         highVelocity: '',
         page: 1,
       },
+      fixedChange: [],
+      moveChange: [],
       reqCheck: false,
-      search: '',
       learningListChange: false,
 
       sunlightItem: [
@@ -318,20 +379,20 @@ export default {
         { name: '야간', value: '야간' },
       ],
       moveItem: [
-        { name: '사람', value: '사람' },
-        { name: '승용차', value: '승용차' },
-        { name: '버스', value: '버스' },
-        { name: '트럭', value: '트럭' },
-        { name: '오토바이', value: '오토바이' },
-        { name: '특수차', value: '특수차' },
+        { name: '사람', value: 'HUMN_CNT' },
+        { name: '승용차', value: 'PASG_CNT' },
+        { name: '버스', value: 'BUS_CNT' },
+        { name: '트럭', value: 'TRCK_CNT' },
+        { name: '오토바이', value: 'MTCY_CNT' },
+        { name: '특수차', value: 'SPAC_CNT' },
       ],
 
       fixedItem: [
-        { name: '정지선', value: '정지선' },
-        { name: '횡단보도', value: '횡단보도' },
-        { name: '방지턱', value: '방지턱' },
-        { name: '공사중', value: '공사중' },
-        { name: '신호등', value: '신호등' },
+        { name: '정지선', value: 'SPLE_CNT' },
+        { name: '횡단보도', value: 'CSWK_CNT' },
+        { name: '방지턱', value: 'SDBP_CNT' },
+        { name: '공사중', value: 'RK_CNT' },
+        { name: '신호등', value: 'TLIGT_CNT' },
       ],
       weatherItem: [
         { name: '전체', value: '' },
@@ -351,7 +412,7 @@ export default {
         { name: '아산시', value: '아산' },
         { name: '안산시', value: '안산' },
         { name: '안양시', value: '안양' },
-        { name: '전주시', value: '전주시' },
+        { name: '전주시', value: '전주' },
         { name: '제주도', value: '제주' },
         { name: '의왕시', value: '의왕' },
         { name: '판교', value: '판교' },
@@ -361,9 +422,9 @@ export default {
 
       learningTypeCodes: [
         { name: '전체', value: '' },
-        { name: 'SEGMENTATION', value: 'SEGMENTATION' },
-        { name: 'ANNOTATION', value: 'ANNOTATION_2D' },
-        { name: 'CUBOID', value: 'cuboid' },
+        { name: 'SEGMENTATION', value: 'SEG' },
+        { name: 'BBOX', value: 'BBOX' },
+        { name: 'CUBOID', value: 'CUBOID' },
       ],
 
       learningTypeCodes2: [],
@@ -386,123 +447,65 @@ export default {
     };
   },
   methods: {
-    async submitForm(nums) {
-      if (nums == 0) {
-        this.learningList = [];
-        this.search = [];
-        this.formParams.page = 1;
+    changeFixed(item) {
+      this.formParams.fixed = [];
+      this.fixedChange.filter(e => {
+        e.value != item.value;
+      });
+      this.fixedChange.forEach(e => {
+        this.formParams.fixed.push(e.value);
+      });
+    },
+    changeMove(item) {
+      this.formParams.move = [];
+      this.moveChange.filter(e => {
+        e.value != item.value;
+      });
+      this.moveChange.forEach(e => {
+        this.formParams.move.push(e.value);
+      });
+    },
+    edit(index, item) {
+      if (!this.editing) {
+        this.editing = item;
+        this.editingIndex = index;
+      } else {
+        this.editing = null;
+        this.editingIndex = -1;
       }
-      if (this.formParams.page == 1) {
-        if (this.formParams.startDate) {
-          let convertDate = this.formParams.startDate.substring(
-            2,
-            this.formParams.startDate.length,
-          );
-          this.search += `&startDate=${convertDate}`;
-        }
-        if (this.formParams.endDate) {
-          let convertDate = this.formParams.endDate.substring(
-            2,
-            this.formParams.endDate.length,
-          );
-          this.search += `&endDate=${convertDate}`;
-        }
-        if (this.formParams.lowVelocity == '') this.search += `&lowVelocity=0`;
-        else if (this.formParams.lowVelocity > 0)
-          this.search += `&lowVelocity=${this.formParams.lowVelocity}`;
-        if (this.formParams.highVelocity)
-          this.search += `&highVelocity=${this.formParams.highVelocity}`;
-        if (this.formParams.sunlight)
-          this.search += `&sunlight=${this.formParams.sunlight}`;
-        if (this.formParams.weather)
-          this.search += `&weather=${this.formParams.weather}`;
-        if (this.formParams.conditions)
-          this.search += `&conditions=${this.formParams.conditions}`;
-        if (this.formParams.environment1 && !this.formParams.environment2)
-          this.search += `&environment1=${this.formParams.environment1}`;
-        else if (this.formParams.environment2)
-          this.search += `&environment2=${this.formParams.environment2}`;
-        if (this.formParams.location)
-          this.search += `&location=${this.formParams.location}`;
-        if (this.formParams.sensorType1 && !this.formParams.sensorType2)
-          this.search += `&senTp=${this.formParams.sensorType1}`;
-        else if (this.formParams.sensorType1 && this.formParams.sensorType2)
-          this.search += `&pstnNo=${this.formParams.sensorType2}`;
-        if (this.formParams.learningType)
-          this.search += `&learningType=${this.formParams.learningType}`;
-        if (this.formParams.learningType2)
-          this.search += `&learningType2=${this.formParams.learningType2}`;
-
-        for (var i = 0; i < this.formParams.move.length; i++) {
-          switch (this.formParams.move[i].name) {
-            case '사람':
-              this.search += `&person=사람`;
-              break;
-            case '승용차':
-              this.search += `&car=승용차`;
-              break;
-            case '버스':
-              this.search += `&bus=버스`;
-              break;
-            case '트럭':
-              this.search += '&truck=트럭';
-              break;
-            case '오토바이':
-              this.search += '&motorCycle=오토바이';
-              break;
-            case '특수차':
-              this.search += '&specialCar=특수차';
-              break;
-          }
-        }
-
-        for (var j = 0; j < this.formParams.fixed.length; j++) {
-          switch (this.formParams.fixed[j].name) {
-            case '정지선':
-              this.search += `&stopLine=정지선`;
-              break;
-            case '횡단보도':
-              this.search += `&crossWalk=횡단보도`;
-              break;
-            case '방지턱':
-              this.search += `&bump=방지턱`;
-              break;
-            case '공사중':
-              this.search += '&construction=트럭';
-              break;
-            case '신호등':
-              this.search += '&traffic=신호등';
-              break;
-          }
-        }
-        console.log('search::', this.search);
-
-        this.learningListChange = false;
-      }
-
-      const { data } = await getLearningList(this.search, this.formParams.page);
-      if (data.length != 0 || nums != 0) {
-        this.learningList = this.learningList.concat(data);
-        this.learningListChange = true;
-        this.formParams.page += 1;
-      } else if (data.length == 0) {
-        alert('데이터가 없습니다');
-      }
-      this.searchDialog2 = false;
-      console.log('learningList:::', this.learningList);
-
-      return this.learningList;
+    },
+    submitForm() {
+      this.showLearningList = true;
+      this.formParams.page = 1;
+      this.$nextTick(() => {
+        this.$refs.learning.submitForm();
+      });
     },
 
     changeLearningType() {
       this.learningTypeCodes2 = [];
       this.formParams.learningType2 = '';
       switch (this.formParams.learningType) {
-        case 'SEGMENTATION':
+        case 'SEG':
           this.learningTypeCodes2 = [
             { name: '전체', value: '' },
-            { name: 'Camera_FrontLeft', value: 'Camera01' },
-            { name: 'Panorama', value: 'Panorama' },
+            { name: '카메라: 전방좌측 (FrontLeft)', value: 'FrontLeft' },
+            { name: '카메라: 파노라마 (Panorama)', value: 'Panorama' },
+          ];
+          break;
+
+        case 'BBOX':
+          this.learningTypeCodes2 = [
+            { name: '전체', value: '' },
+            { name: '카메라: 전방좌측 (FrontLeft)', value: 'FrontLeft' },
+            { name: '카메라: 파노라마 (Panorama)', value: 'Panorama' },
+          ];
+          break;
+
+        case 'CUBOID':
+          this.learningTypeCodes2 = [
+            { name: '전체', value: '' },
+            { name: '라이다: 전방향 (VLS128)', value: 'VLS128' },
           ];
           break;
 
@@ -555,6 +558,14 @@ export default {
     endDateChange(endDate) {
       this.formParams.endDate = endDate;
     },
+
+    hideLearningList() {
+      this.showLearningList = false;
+      this.alertTitle = '검색조건에 맞는 데이터가 없습니다.';
+      this.alertContent =
+        '검색조건에 맞는 데이터가 없습니다. 다시 시도해주세요.';
+      this.alertModal = true;
+    },
   },
 };
 </script>
@@ -581,6 +592,9 @@ export default {
   font-size: 13px;
   font-weight: bold;
 }
+/* ::v-deep .combobox .v-text-field {
+  font-size: 12px;
+} */
 .cards {
   text-align: center;
   font-weight: bold;

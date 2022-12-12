@@ -13,8 +13,7 @@ const getSensorSectionList = param => ins.post(`sensorSectionList`, param);
 const getSensorRandomList = param => ins.post(`sensorRandomList`, param);
 
 // learning api.
-const getLearningList = (param, page) =>
-  ins.post(`learningList?${param}&page=${page}`);
+const getLearningList = param => ins.post(`learningList`, param);
 
 // spatial api.
 const getSpatialList = param => ins.post(`spatialList?${param}`);

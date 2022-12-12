@@ -23,7 +23,7 @@
       </div>
       <div class="headers-div" style="margin-top: 30px; margin-bottom: 50px">
         <v-container style="background-color: #1111">
-          <v-row>
+          <v-row style="height: 1000px">
             <v-col
               v-for="(item, i) in sensorList"
               :key="i"
@@ -267,9 +267,6 @@ export default {
     url() {
       return this.$store.state.url;
     },
-    formParam() {
-      return JSON.stringify(this.formParams);
-    },
   },
 
   methods: {
@@ -334,7 +331,7 @@ export default {
 
     async infiniteHandler($state) {
       this.formParams.page += 1;
-      const { data } = await getSensorList(this.formParam);
+      const { data } = await getSensorList(this.formParams);
       this.sensorList = this.sensorList.concat(data);
       if (data.length < 49) {
         $state.complete();
@@ -368,7 +365,7 @@ export default {
     async submitForm() {
       this.isLoading = true;
       try {
-        const { data } = await getSensorList(this.formParam);
+        const { data } = await getSensorList(this.formParams);
         if (data) {
           this.sensorList = data;
           this.isLoading = false;
@@ -387,7 +384,7 @@ export default {
       this.circularContent = '압축 할 데이터를 받아오는중입니다...';
       this.circularModal = true;
 
-      const { data } = await getSensorSectionList(this.formParam);
+      const { data } = await getSensorSectionList(this.formParams);
       if (!section.xlsx) {
         await this.downloadZip(data);
       } else {
@@ -400,7 +397,7 @@ export default {
       this.formParams.randomNumber = random.randomNum;
       this.circularContent = '압축 할 데이터를 받아오는중입니다...';
       this.circularModal = true;
-      const { data } = await getSensorRandomList(this.formParam);
+      const { data } = await getSensorRandomList(this.formParams);
       if (!random.xlsx) {
         await this.downloadZip(data);
       } else {
@@ -432,7 +429,6 @@ export default {
     },
 
     downloadCSV(csv) {
-      console.log(csv);
       const BOM = '\uFEFF';
       csv = BOM + csv;
       let filename = 'LX_sensor_data';

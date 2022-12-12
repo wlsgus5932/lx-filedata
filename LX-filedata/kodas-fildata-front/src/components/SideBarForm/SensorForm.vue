@@ -355,11 +355,13 @@ export default {
       }
     },
     startDateChange(startDate) {
-      this.formParams.startDate = startDate.substring(2, startDate.length);
+      // this.formParams.startDate = startDate.substring(2, startDate.length);
+      this.formParams.startDate = startDate;
     },
 
     endDateChange(endDate) {
-      this.formParams.endDate = endDate.substring(2, endDate.length);
+      // this.formParams.endDate = endDate.substring(2, endDate.length);
+      this.formParams.endDate = endDate;
     },
 
     hideModal() {

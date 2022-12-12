@@ -62,8 +62,8 @@
 <script>
 export default {
   data: () => ({
-    endDate: '',
     startDate: '2018-05-27',
+    endDate: '',
     menu1: false,
     menu2: false,
   }),
@@ -82,14 +82,17 @@ export default {
       let day = ('0' + today.getDate()).slice(-2);
 
       this.endDate = year + '-' + month + '-' + day;
+      // this.endDate2 = year2 + '-' + month + '-' + day;
     },
 
     startDateUpdate() {
-      this.$emit('startDate', this.startDate);
+      let startDate2 = this.startDate.slice(2);
+      this.$emit('startDate', startDate2);
     },
 
     endDateUpdate() {
-      this.$emit('endDate', this.endDate);
+      let endDate2 = this.endDate.slice(2);
+      this.$emit('endDate', endDate2);
     },
 
     formatDate(date) {

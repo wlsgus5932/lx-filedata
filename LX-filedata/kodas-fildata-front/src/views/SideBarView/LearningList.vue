@@ -1,229 +1,266 @@
 <template>
   <div class="learning-list">
-    <div class="header">
-      <v-checkbox
-        label="전체선택"
-        v-model="checked"
-        @click="checked != checked, allChecked()"
-        style="margin: 0px 10px; font-weight: bold"
-        class="font-weight-bold; white--text"
-      ></v-checkbox>
+    <div
+      v-if="isLoading"
+      style="height: 100%; text-align: center; padding-top: 50%"
+    >
+      <span style="margin-top: 600px">
+        <Spinner></Spinner>
+      </span>
+      <h3>목록을 검색중입니다.</h3>
     </div>
-    <div class="headers-div" style="margin-top: 30px; margin-bottom: 50px">
-      <v-container style="background-color: #1111">
-        <v-row>
-          <v-col
-            v-for="(item, i) in list"
-            :key="i"
-            class="d-flex child-flex"
-            cols="4"
-          >
-            <v-hover v-slot="{ hover }" open-delay="200">
-              <label :for="i">
-                <v-card
-                  :elevation="hover ? 16 : 1"
-                  :class="{ 'on-hover': hover }"
-                  id="contents"
-                >
-                  <input
-                    type="checkbox"
-                    name=""
-                    :id="i"
-                    style=""
-                    v-model="checkList"
-                    :value="item"
-                  />
-                  <v-img
-                    @mouseover="setViewerData(item), (viewerChange = true)"
-                    @mouseout="viewerChange = false"
-                    :src="url + item.image_file_path + item.image_file_nm"
-                    aspect-ratio="1"
-                    class="grey lighten-2"
-                  >
-                    <template v-slot:placeholder>
-                      <v-row
-                        class="fill-height ma-0"
-                        align="center"
-                        justify="center"
-                      >
-                        <v-progress-circular
-                          indeterminate
-                          color="grey lighten-5"
-                        ></v-progress-circular>
-                      </v-row>
-                    </template>
-                  </v-img>
-                  <p class="ellipsis" style="z-index: 1; font-weight: bold">
-                    {{ i + 1 }}. {{ item.file_nm }}
-                  </p>
-                </v-card>
-              </label>
-            </v-hover>
-          </v-col>
-        </v-row>
-
-        <div style="height: 120px">
-          <infinite-loading @infinite="infiniteHandler" spinner="spiral">
-            <span
-              slot="no-more"
-              style="
-                color: rgb(102, 102, 102);
-                font-size: 14px;
-                padding: 10px 0px;
-              "
-            >
-              목록의 끝입니다
-            </span>
-          </infinite-loading>
-        </div>
-
-        <div class="viewer" v-if="viewerChange">
-          <ImageViewer :list="viewerData" :viewer="'learning'"></ImageViewer>
-        </div>
-      </v-container>
-      <div class="footers" style="padding: 10px">
-        <v-row>
-          <v-col cols="4">
-            <v-btn
-              color="secondary white--text font-weight-bold"
-              width="140"
-              small
-              height="40"
-              @click.stop="
-                (dialog = true),
-                  (downloadAll = true),
-                  (checked = true),
-                  allCheckedBtn()
-              "
-              >전체 다운로드</v-btn
-            >
-          </v-col>
-          <v-col cols="4">
-            <v-btn
-              color="success white--text font-weight-bold"
-              width="140"
-              height="40"
-              dark
-              small
-              @click.stop="(dialog = true), (download = true)"
-              depressed
-            >
-              선택 다운로드
-            </v-btn>
-          </v-col>
-          <v-col cols="4">
-            <v-btn
-              height="40"
-              width="140"
-              color="error white--text font-weight-bold"
-              @click="countDialog = true"
-              small
-              >수량 다운로드</v-btn
-            >
-          </v-col>
-        </v-row>
-        <p>total: {{ totalCount | comma }}</p>
+    <template v-else>
+      <div class="header">
+        <v-checkbox
+          label="전체선택"
+          v-model="checked"
+          @click="checked != checked, allChecked()"
+          style="margin: 0px 10px; font-weight: bold"
+          class="font-weight-bold; white--text"
+        ></v-checkbox>
       </div>
+      <div class="headers-div" style="margin-top: 30px; margin-bottom: 50px">
+        <v-container style="background-color: #1111">
+          <v-row>
+            <v-col
+              v-for="(item, i) in learningList"
+              :key="i"
+              class="d-flex child-flex"
+              cols="4"
+            >
+              <v-hover v-slot="{ hover }" open-delay="200">
+                <label :for="i">
+                  <v-card
+                    :elevation="hover ? 16 : 1"
+                    :class="{ 'on-hover': hover }"
+                    id="contents"
+                  >
+                    <input
+                      type="checkbox"
+                      name=""
+                      :id="i"
+                      style=""
+                      v-model="checkList"
+                      :value="item"
+                    />
+                    <v-img
+                      v-if="item.data_type == 'CUBOID'"
+                      @mouseover="setViewerData(item)"
+                      @mouseout="viewerChange = false"
+                      aspect-ratio="1"
+                      class="grey lighten-2"
+                      :src="textImg"
+                    >
+                      <template v-slot:placeholder>
+                        <v-row
+                          class="fill-height ma-0"
+                          align="center"
+                          justify="center"
+                        >
+                          <v-progress-circular
+                            indeterminate
+                            color="grey lighten-5"
+                          ></v-progress-circular>
+                        </v-row>
+                      </template>
+                    </v-img>
 
-      <div class="text-center">
-        <!-- 다운로드 다이얼로그 -->
-        <v-dialog v-model="dialog" width="800">
-          <v-card width="100%">
-            <v-card-title>
-              선택된 {{ checkList.length }}개의 파일을 다운로드 하시겠습니까?
-            </v-card-title>
+                    <v-img
+                      v-else
+                      @mouseover="setViewerData(item)"
+                      @mouseout="viewerChange = false"
+                      aspect-ratio="1"
+                      class="grey lighten-2"
+                      :src="imageImg"
+                    >
+                      <template v-slot:placeholder>
+                        <v-row
+                          class="fill-height ma-0"
+                          align="center"
+                          justify="center"
+                        >
+                          <v-progress-circular
+                            indeterminate
+                            color="grey lighten-5"
+                          ></v-progress-circular>
+                        </v-row>
+                      </template>
+                    </v-img>
+                    <p class="ellipsis" style="z-index: 1; font-weight: bold">
+                      {{ i + 1 }}. {{ item.file_nm }}
+                    </p>
+                  </v-card>
+                </label>
+              </v-hover>
+            </v-col>
+          </v-row>
 
-            <v-card-text class="font-weight-bold grey--text mb-2">
-              파일의 개수 및 사용자의 네트워크 상태에 따라 소요시간이 길어질 수
-              있습니다. (평균 10분 미만)
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-
-              <v-btn color="green darken-1" text @click="dialog = false">
-                취소
-              </v-btn>
-
-              <v-btn
-                color="green darken-1"
-                text
-                @click="
-                  ((dialog = false), (dialog2 = true)),
-                    download ? downloadChecked() : downloadAllChecked()
+          <div style="height: 120px">
+            <infinite-loading @infinite="infiniteHandler" spinner="spiral">
+              <span
+                slot="no-more"
+                style="
+                  color: rgb(102, 102, 102);
+                  font-size: 14px;
+                  padding: 10px 0px;
                 "
               >
-                확인
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+                목록의 끝입니다
+              </span>
+            </infinite-loading>
+          </div>
 
-        <!-- 수량다운로드 다이얼로그-->
-        <v-dialog v-model="countDialog" width="500">
-          <v-card>
-            <v-card-title class="text-h5 grey lighten-2">
-              수량 다운로드
-            </v-card-title>
-
-            <v-card-text>
-              <v-form ref="form" lazy-validation>
-                <v-text-field
-                  v-model="countNumber"
-                  label="개수"
-                  :rules="rules"
-                  hide-details="auto"
-                  type="number"
-                ></v-text-field>
-                <v-card-text>
-                  원하는 수량 입력 후 입력 수만큼 다운로드 받을 수 있습니다.
-                </v-card-text>
-              </v-form>
-            </v-card-text>
-
-            <v-divider></v-divider>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
+          <div class="viewer" v-if="viewerChange">
+            <ImageViewer :list="viewerData" :viewer="'learning'"></ImageViewer>
+          </div>
+        </v-container>
+        <div class="footers" style="padding: 10px">
+          <v-row>
+            <v-col cols="4">
               <v-btn
-                color="primary"
-                text
-                @click="(countDialog = false), (dialog2 = true), countNum()"
+                color="secondary white--text font-weight-bold"
+                width="140"
+                small
+                height="40"
+                @click.stop="
+                  (dialog = true),
+                    (downloadAll = true),
+                    (checked = true),
+                    allCheckedBtn()
+                "
+                >전체 다운로드</v-btn
               >
-                다운로드
+            </v-col>
+            <v-col cols="4">
+              <v-btn
+                color="success white--text font-weight-bold"
+                width="140"
+                height="40"
+                dark
+                small
+                @click.stop="(dialog = true), (download = true)"
+                depressed
+              >
+                선택 다운로드
               </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+            </v-col>
+            <v-col cols="4">
+              <v-btn
+                height="40"
+                width="140"
+                color="error white--text font-weight-bold"
+                @click="countDialog = true"
+                small
+                >수량 다운로드</v-btn
+              >
+            </v-col>
+          </v-row>
+          <p v-if="learningList.length > 0">
+            total: {{ learningList[0].total_count | comma }}
+          </p>
+        </div>
 
-        <v-dialog
-          v-model="dialog2"
-          width="500"
-          persistent
-          class="justify-center"
-        >
-          <v-card width="100%" height="8%">
-            <v-card-actions>
-              <v-progress-circular
-                :size="30"
-                color="primary"
-                indeterminate
-              ></v-progress-circular>
+        <div class="text-center">
+          <!-- 다운로드 다이얼로그 -->
+          <v-dialog v-model="dialog" width="800">
+            <v-card width="100%">
+              <v-card-title>
+                <!-- 선택된 {{ checkList.length }}개의 파일을 다운로드 하시겠습니까? -->
+              </v-card-title>
 
-              <v-card-text class="font-weight-bold grey--text">
-                파일을 압축중입니다...
+              <v-card-text class="font-weight-bold grey--text mb-2">
+                파일의 개수 및 사용자의 네트워크 상태에 따라 소요시간이 길어질
+                수 있습니다. (평균 10분 미만)
               </v-card-text>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+
+                <v-btn color="green darken-1" text @click="dialog = false">
+                  취소
+                </v-btn>
+
+                <v-btn
+                  color="green darken-1"
+                  text
+                  @click="
+                    ((dialog = false), (dialog2 = true)),
+                      download ? downloadChecked() : downloadAllChecked()
+                  "
+                >
+                  확인
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+          <!-- 수량다운로드 다이얼로그-->
+          <v-dialog v-model="countDialog" width="500">
+            <v-card>
+              <v-card-title class="text-h5 grey lighten-2">
+                수량 다운로드
+              </v-card-title>
+
+              <v-card-text>
+                <v-form ref="form" lazy-validation>
+                  <v-text-field
+                    v-model="countNumber"
+                    label="개수"
+                    :rules="rules"
+                    hide-details="auto"
+                    type="number"
+                  ></v-text-field>
+                  <v-card-text>
+                    원하는 수량 입력 후 입력 수만큼 다운로드 받을 수 있습니다.
+                  </v-card-text>
+                </v-form>
+              </v-card-text>
+
+              <v-divider></v-divider>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="primary"
+                  text
+                  @click="(countDialog = false), (dialog2 = true), countNum()"
+                >
+                  다운로드
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+          <v-dialog
+            v-model="dialog2"
+            width="500"
+            persistent
+            class="justify-center"
+          >
+            <v-card width="100%" height="8%">
+              <v-card-actions>
+                <v-progress-circular
+                  :size="30"
+                  color="primary"
+                  indeterminate
+                ></v-progress-circular>
+
+                <v-card-text class="font-weight-bold grey--text">
+                  파일을 압축중입니다...
+                </v-card-text>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <script>
 import ImageViewer from '../ImageViewer.vue';
 import JSZip from 'jszip';
+import Spinner from '@/components/Spinner/Spinner.vue';
 import { saveAs } from 'file-saver';
 import JSZipUtils from 'jszip-utils';
 import infiniteLoading from 'vue-infinite-loading';
@@ -231,7 +268,7 @@ import { getLearningList } from '@/api/index';
 import axios from 'axios';
 
 export default {
-  components: { ImageViewer, infiniteLoading },
+  components: { ImageViewer, infiniteLoading, Spinner },
   props: ['list', 'formParams'],
 
   filters: {
@@ -241,6 +278,11 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
+      learningList: '',
+      textImg: require('../../assets/img/textIcon.png'),
+      imageImg: require('../../assets/img/imageIcon.png'),
+
       viewerData: [],
       checkList: [],
       selected: '',
@@ -270,7 +312,22 @@ export default {
   },
 
   methods: {
+    async submitForm() {
+      this.isLoading = true;
+      try {
+        const { data } = await getLearningList(this.formParams);
+        if (data) {
+          this.learningList = data;
+          this.isLoading = false;
+        } else {
+          this.$emit('hide');
+        }
+      } catch (err) {
+        this.$emit('hide');
+      }
+    },
     setViewerData(data) {
+      this.viewerChange = true;
       this.viewerData = data;
     },
 
@@ -442,9 +499,10 @@ export default {
     // },
 
     async infiniteHandler($state) {
-      console.log('infiniteHandler');
-      let data = await this.$parent.submitForm(1);
-      if (data.length < 100) {
+      const { data } = await getLearningList(this.formParams);
+      this.learningList = this.learningList.concat(data);
+      console.log(data.length);
+      if (data.length < 49) {
         $state.complete();
       } else {
         $state.loaded();
@@ -582,7 +640,7 @@ export default {
 }
 
 .viewer {
-  /* text-align: center; */
+  margin-top: 20px;
   height: 800px;
   width: 700px;
   position: fixed;
