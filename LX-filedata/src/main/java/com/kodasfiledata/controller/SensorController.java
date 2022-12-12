@@ -22,10 +22,7 @@ public class SensorController {
 	
 	@PostMapping("sensorList")
 	public List<Sensor> getSensor(@RequestBody SensorParameter param) {
-		System.out.println(param.toString());
 		List<Sensor> list = service.getSensorList(param);
-		System.out.println(list.toString());
-		System.out.println("springboot test");
 		if(list == null || list.isEmpty()) {
 			return null;
 		} else {
@@ -35,9 +32,7 @@ public class SensorController {
 	
 	@PostMapping("sensorSectionList")
 	public List<Sensor> getSection(@RequestBody SensorParameter param) {
-		System.out.println(param.toString());
 		List<Sensor> list = service.getSensorSectionList(param);
-		System.out.println(list.toString());
 		if(list == null || list.isEmpty()) {
 			return null;
 		} else {
@@ -47,9 +42,7 @@ public class SensorController {
 	
 	@PostMapping("sensorRandomList")
 	public List<Sensor> getRandom(@RequestBody SensorParameter param) {
-		System.out.println(param.toString());
 		List<Sensor> list = service.getSensorRandomList(param);
-		System.out.println(list.toString());
 		if(list == null || list.isEmpty()) {
 			return null;
 		} else {

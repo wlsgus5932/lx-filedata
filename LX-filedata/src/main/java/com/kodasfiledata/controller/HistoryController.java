@@ -16,7 +16,6 @@ public class HistoryController {
 	
 	@PostMapping("historyList")
 	public void getHistory(@RequestBody HistoryParameter param) {
-		System.out.println(param);
 		service.setHistoryList(param);
 	}
 

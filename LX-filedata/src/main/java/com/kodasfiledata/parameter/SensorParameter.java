@@ -17,8 +17,6 @@ public class SensorParameter {
 	private int startNumber;
 	private int endNumber;
 	private int randomNumber;
-	
-	
 
 	public int getRandomNumber() {
 		return randomNumber;
