@@ -307,6 +307,7 @@ export default {
             this.historyForm.dataName.push(item.file_nm);
           });
         }
+        
 
         const fileset = new Set();
         for (const item of files) {
