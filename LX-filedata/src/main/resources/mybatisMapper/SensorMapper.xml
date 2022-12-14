@@ -116,7 +116,7 @@
 				</where>
 					 	) T
 					 <if test="randomNumber != null and randomNumber != ''">
-						WHERE T.rownumber &gt; 1 AND T.rownumber &lt; = #{randomNumber}
+						WHERE T.rownumber &gt; 0 AND T.rownumber &lt; = #{randomNumber}
 					 </if>
 		</select>
 		

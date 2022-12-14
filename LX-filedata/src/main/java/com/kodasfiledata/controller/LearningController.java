@@ -24,11 +24,33 @@ public class LearningController {
 		public List<Learning> getLearning(@RequestBody LearningParameter param) {
 			System.out.println(param);
 			List<Learning> list = service.getLearningList(param);
-			/*
-			 * int total = service.getLearningListTotal(param); if(list.size() > 0) {
-			 * list.get(0).setTotal_count(total); }
-			 */
-			return list;
+			if(list == null || list.isEmpty()) {
+				return null;
+			} else {
+				return list;
+			}
+		}
+		
+		@PostMapping("learningSectionList")
+		public List<Learning> getSection(@RequestBody LearningParameter param) {
+			System.out.println(param);
+			List<Learning> list = service.getLearningSectionList(param);
+			if(list == null || list.isEmpty()) {
+				return null;
+			} else {
+				return list;
+			}
+		}
+		
+		@PostMapping("learningRandomList")
+		public List<Learning> getRandom(@RequestBody LearningParameter param) {
+			System.out.println(param);
+			List<Learning> list = service.getLearningRandomList(param);
+			if(list == null || list.isEmpty()) {
+				return null;
+			} else {
+				return list;
+			}
 		}
 
 }

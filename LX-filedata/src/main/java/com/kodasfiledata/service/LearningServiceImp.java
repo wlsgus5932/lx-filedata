@@ -21,12 +21,12 @@ public class LearningServiceImp implements LearningService {
 	public List<Learning> getLearningList(LearningParameter param) {
 		return dao.getLearningList(param);
 	}
-
-
 	@Override
-	public int getLearningListTotal(LearningParameter param) {
-		// TODO Auto-generated method stub
-		return dao.getLearningListTotal(param);
-	};
-
+	public List<Learning> getLearningSectionList(LearningParameter param) {
+		return dao.getLearningSectionList(param);
+	}
+	@Override
+	public List<Learning> getLearningRandomList(LearningParameter param) {
+		return dao.getLearningRandomList(param);
+	}
 }

@@ -13,32 +13,15 @@ public class LearningParameter {
 	private String sunlight;
 	private String weather;
 	private String conditions;
-	private String environment1;
-	private String environment2;
+	private List<String> environment;
 	private int page;
 	private List<String> move;
 	private List<String> fixed;
 	private String location;
-//	private List<String> environment2 = new ArrayList<>();
-//	private String person;
-//	private String car;
-//	private String truck;
-//	private String bus;
-//	private String van;
-//	private String motorCycle;
-//	private String specialCar;
-//	private String senTp;
-//	private String pstnNo;
-//	private int fileId;
-//	private int randomSearchCnt;
-//	private Boolean isSector;
-//	private String stopLine;
-//	private String crossWalk;
-//	private String traffic;
-//	private String construction;
-//	private String bump;
-//	private int page;
-//	private int countNumber;
+	private int startNumber;
+	private int endNumber;
+	private int randomNumber;
+	
 	public String getStartDate() {
 		return startDate;
 	}
@@ -93,18 +76,6 @@ public class LearningParameter {
 	public void setConditions(String conditions) {
 		this.conditions = conditions;
 	}
-	public String getEnvironment1() {
-		return environment1;
-	}
-	public void setEnvironment1(String environment1) {
-		this.environment1 = environment1;
-	}
-	public String getEnvironment2() {
-		return environment2;
-	}
-	public void setEnvironment2(String environment2) {
-		this.environment2 = environment2;
-	}
 	public int getPage() {
 		return page;
 	}
@@ -129,18 +100,36 @@ public class LearningParameter {
 	public void setLocation(String location) {
 		this.location = location;
 	}
-	
+	public List<String> getEnvironment() {
+		return environment;
+	}
+	public void setEnvironment(List<String> environment) {
+		this.environment = environment;
+	}
+	public int getStartNumber() {
+		return startNumber;
+	}
+	public void setStartNumber(int startNumber) {
+		this.startNumber = startNumber;
+	}
+	public int getEndNumber() {
+		return endNumber;
+	}
+	public void setEndNumber(int endNumber) {
+		this.endNumber = endNumber;
+	}
+	public int getRandomNumber() {
+		return randomNumber;
+	}
+	public void setRandomNumber(int randomNumber) {
+		this.randomNumber = randomNumber;
+	}
 	@Override
 	public String toString() {
 		return "LearningParameter [startDate=" + startDate + ", endDate=" + endDate + ", learningType=" + learningType
 				+ ", learningType2=" + learningType2 + ", lowVelocity=" + lowVelocity + ", highVelocity=" + highVelocity
-				+ ", sunlight=" + sunlight + ", weather=" + weather + ", conditions=" + conditions + ", environment1="
-				+ environment1 + ", environment2=" + environment2 + ", page=" + page + ", move=" + move + ", fixed="
-				+ fixed + ", location=" + location + "]";
+				+ ", sunlight=" + sunlight + ", weather=" + weather + ", conditions=" + conditions + ", environment="
+				+ environment + ", page=" + page + ", move=" + move + ", fixed=" + fixed + ", location=" + location
+				+ ", startNumber=" + startNumber + ", endNumber=" + endNumber + ", randomNumber=" + randomNumber + "]";
 	}
-	
-	
-	
-	
-
 }

@@ -23,6 +23,7 @@ public class SensorController {
 	@PostMapping("sensorList")
 	public List<Sensor> getSensor(@RequestBody SensorParameter param) {
 		List<Sensor> list = service.getSensorList(param);
+		System.out.println("sensor:::" + param);
 		if(list == null || list.isEmpty()) {
 			return null;
 		} else {

@@ -11,7 +11,6 @@ import com.kodasfiledata.parameter.LearningParameter;
 @Mapper
 public interface LearningDao {
 	public List<Learning> getLearningList(LearningParameter param);
-
-	public int getLearningListTotal(LearningParameter param);
-
+	public List<Learning> getLearningSectionList(LearningParameter param);
+	public List<Learning> getLearningRandomList(LearningParameter param);
 }

@@ -8,7 +8,6 @@ import com.kodasfiledata.parameter.LearningParameter;
 
 public interface LearningService {
 	public List<Learning> getLearningList(LearningParameter param);
-
-	public int getLearningListTotal(LearningParameter param);
-
+	public List<Learning> getLearningSectionList(LearningParameter param);
+	public List<Learning> getLearningRandomList(LearningParameter param);
 }
