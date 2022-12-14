@@ -243,25 +243,13 @@
         <v-card class="cards">
           <v-col cols="11">
             <v-select
-              :items="environmentCodes1"
+              :items="environmentCodes"
               item-text="name"
               item-value="value"
-              v-model="formParams.environment1"
+              v-model="formParams.environment"
               label="도로환경"
-              v-on:change="changeEnvironment"
               dense
               prepend-icon="mdi-road"
-            ></v-select>
-          </v-col>
-          <v-col cols="11" v-if="environmentCodes2 != 0">
-            <v-select
-              :items="environmentCodes2"
-              v-model="formParams.environment2"
-              item-text="name"
-              item-value="value"
-              label="도로환경2"
-              dense
-              prepend-icon="2"
             ></v-select>
           </v-col>
         </v-card>
@@ -278,7 +266,6 @@
     <LearningList
       v-if="showLearningList"
       :formParams="formParams"
-      :list="learningList"
       @hide="hideLearningList()"
       ref="learning"
     ></LearningList>
@@ -333,14 +320,26 @@ export default {
 
   data() {
     return {
-      editing: '',
-      editingIndex: '',
+      formParams: {
+        startDate: '',
+        endDate: '',
+        sunlight: '',
+        move: [],
+        fixed: [],
+        weather: '',
+        location: '',
+        learningType: '',
+        learningType2: '',
+        conditions: '',
+        environment: [],
+        lowVelocity: '',
+        highVelocity: '',
+        page: 1,
+        startNumber: '',
+        endNumber: '',
+        randomNumber: '',
+      },
       isLoading: false,
-      btnLoading: false,
-      learningList: [],
-      searchDialog: false,
-      searchDialog2: false,
-
       showLearningList: false,
       title: '선택한 조건으로 검색 하시겠습니까?',
       content: '사용자의 네트워크 상태에 따라 소요시간이 길어질 수 있습니다.',
@@ -350,28 +349,11 @@ export default {
       choiceModal: false,
       alertModal: false,
       circularModal: false,
-
-      formParams: {
-        startDate: '',
-        endDate: '',
-        sunlight: '',
-        move: '',
-        fixed: [],
-        weather: '',
-        location: '',
-        learningType: '',
-        learningType2: '',
-        conditions: '',
-        environment1: '',
-        environment2: '',
-        lowVelocity: '',
-        highVelocity: '',
-        page: 1,
-      },
       fixedChange: [],
       moveChange: [],
       reqCheck: false,
-      learningListChange: false,
+      editing: '',
+      editingIndex: '',
 
       sunlightItem: [
         { name: '전체', value: '' },
@@ -434,19 +416,44 @@ export default {
         { name: '긴급상황(도로위 물체)', code: 'C00500001' },
         { name: '긴급상황(사람난입)', code: 'C00500002' },
         { name: '일반상황', code: 'C00500003' },
-        { name: '일반상황 공사상황', code: 'C00500004' },
+        { name: '공사상황', code: 'C00500004' },
       ],
 
-      environmentCodes1: [
-        { name: '전체', value: '' },
-        { name: '일반도로', value: '일반도로' },
-        { name: '주차장', value: '주차장' },
+      environmentCodes: [
+        { name: '전체', value: [] },
+        { name: '일반도로', value: ['C00600002'] },
+        { name: '주차장', value: ['C00600017'] },
+        {
+          name: '교차로',
+          value: [
+            'C00600001',
+            'C00600005',
+            'C00600006',
+            'C00600007',
+            'C00600012',
+          ],
+        },
+        {
+          name: '고가차도',
+          value: ['C00600003', 'C00600004', 'C00600006', 'C00600007'],
+        },
+        {
+          name: '터널',
+          value: ['C00600010', 'C00600014', 'C00600016'],
+        },
+        { name: '톨게이트', value: ['C00600015', 'C00600016'] },
       ],
-
-      environmentCodes2: [],
     };
   },
   methods: {
+    submitForm() {
+      this.showLearningList = true;
+      this.formParams.page = 1;
+      this.$nextTick(() => {
+        this.$refs.learning.submitForm();
+      });
+    },
+
     changeFixed(item) {
       this.formParams.fixed = [];
       this.fixedChange.filter(e => {
@@ -456,6 +463,7 @@ export default {
         this.formParams.fixed.push(e.value);
       });
     },
+
     changeMove(item) {
       this.formParams.move = [];
       this.moveChange.filter(e => {
@@ -465,6 +473,7 @@ export default {
         this.formParams.move.push(e.value);
       });
     },
+
     edit(index, item) {
       if (!this.editing) {
         this.editing = item;
@@ -473,13 +482,6 @@ export default {
         this.editing = null;
         this.editingIndex = -1;
       }
-    },
-    submitForm() {
-      this.showLearningList = true;
-      this.formParams.page = 1;
-      this.$nextTick(() => {
-        this.$refs.learning.submitForm();
-      });
     },
 
     changeLearningType() {
@@ -514,43 +516,6 @@ export default {
       }
     },
 
-    changeEnvironment() {
-      this.environmentCodes2 = [];
-      this.formParams.environment2 = '';
-      if (this.formParams.environment1 == '일반도로') {
-        this.environmentCodes2 = [
-          { name: '전체', value: '' },
-          {
-            name: '교차로',
-            value: [
-              'C00600001',
-              'C00600005',
-              'C00600006',
-              'C00600007',
-              'C00600012',
-            ],
-          },
-          {
-            name: '고가차도',
-            value: ['C00600003', 'C00600004', 'C00600006', 'C00600007'],
-          },
-          {
-            name: '내리막',
-            value: [
-              'C00600007',
-              'C00600008',
-              'C00600009',
-              'C00600011',
-              'C00600012',
-            ],
-          },
-          { name: '오르막', value: ['C00600007', 'C00600008', 'C00600009'] },
-          { name: '터널', value: ['C00600010', 'C00600014', 'C00600016'] },
-          { name: '톨게이트', value: ['C00600015', 'C00600016'] },
-        ];
-      }
-    },
-
     startDateChange(startDate) {
       this.formParams.startDate = startDate;
     },
@@ -565,6 +530,12 @@ export default {
       this.alertContent =
         '검색조건에 맞는 데이터가 없습니다. 다시 시도해주세요.';
       this.alertModal = true;
+    },
+
+    hideModal() {
+      this.alertModal = false;
+      this.circularModal = false;
+      this.choiceModal = false;
     },
   },
 };

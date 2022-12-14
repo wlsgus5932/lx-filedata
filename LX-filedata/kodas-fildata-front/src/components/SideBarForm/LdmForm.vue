@@ -133,7 +133,6 @@ export default {
       dialog: false,
       dialog2: false,
       btnName: '',
-      // $store.state.url: 'http://124.194.100.230:10002',
     };
   },
 

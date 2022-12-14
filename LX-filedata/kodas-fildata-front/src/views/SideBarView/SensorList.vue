@@ -23,7 +23,7 @@
       </div>
       <div class="headers-div" style="margin-top: 30px; margin-bottom: 50px">
         <v-container style="background-color: #1111">
-          <v-row style="height: 1000px">
+          <v-row>
             <v-col
               v-for="(item, i) in sensorList"
               :key="i"
@@ -252,15 +252,10 @@ export default {
         value => !!value || '1이상 입력해주세요. 숫자만 입력 가능합니다.',
         value => (value && value.length >= 1) || 'Min 3 characters',
       ],
-      // url: 'http://124.194.100.230:10002',
       textImg: require('../../assets/img/textIcon.png'),
       imageImg: require('../../assets/img/imageIcon.png'),
       isLoading: false,
     };
-  },
-
-  mounted() {
-    this.isLoading = true;
   },
 
   computed: {
@@ -307,7 +302,6 @@ export default {
             this.historyForm.dataName.push(item.file_nm);
           });
         }
-        
 
         const fileset = new Set();
         for (const item of files) {

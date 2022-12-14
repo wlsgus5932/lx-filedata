@@ -5,19 +5,22 @@ const ins = axios.create({
   headers: { 'Content-Type': `application/json` },
 });
 
-// sensor api.
+// 센서 api
 const getSensorList = param => ins.post(`sensorList`, param);
 
 const getSensorSectionList = param => ins.post(`sensorSectionList`, param);
 
 const getSensorRandomList = param => ins.post(`sensorRandomList`, param);
 
-// learning api.
+// 학습 api
 const getLearningList = param => ins.post(`learningList`, param);
 
-// spatial api.
+const getLearningSectionList = param => ins.post(`learningSectionList`, param);
+
+const getLearningRandomList = param => ins.post(`learningRandomList`, param);
+
+// 공간 api
 const getSpatialList = param => ins.post(`spatialList?${param}`);
-// end.
 
 const getSelectZoneList = param => ins.post(`spatialList?${param}`);
 
@@ -32,6 +35,8 @@ export {
   getSensorSectionList,
   getSensorRandomList,
   getLearningList,
+  getLearningSectionList,
+  getLearningRandomList,
   getLocationCode,
   getSpatialList,
   getSelectZoneList,

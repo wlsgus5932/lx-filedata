@@ -11,13 +11,15 @@
     </div>
     <template v-else>
       <div class="header">
-        <v-checkbox
-          label="전체선택"
-          v-model="checked"
-          @click="checked != checked, allChecked()"
-          style="margin: 0px 10px; font-weight: bold"
-          class="font-weight-bold; white--text"
-        ></v-checkbox>
+        <p style="width: 120px">
+          <v-checkbox
+            label="전체선택"
+            v-model="checked"
+            @click="checked != checked, allChecked()"
+            style="margin: 0px 10px; font-weight: bold"
+            class="font-weight-bold; white--text"
+          ></v-checkbox>
+        </p>
       </div>
       <div class="headers-div" style="margin-top: 30px; margin-bottom: 50px">
         <v-container style="background-color: #1111">
@@ -96,18 +98,7 @@
           </v-row>
 
           <div style="height: 120px">
-            <infinite-loading @infinite="infiniteHandler" spinner="spiral">
-              <span
-                slot="no-more"
-                style="
-                  color: rgb(102, 102, 102);
-                  font-size: 14px;
-                  padding: 10px 0px;
-                "
-              >
-                목록의 끝입니다
-              </span>
-            </infinite-loading>
+            <infinite-loading @infinite="infiniteHandler" spinner="spiral" />
           </div>
 
           <div class="viewer" v-if="viewerChange">
@@ -122,13 +113,8 @@
                 width="140"
                 small
                 height="40"
-                @click.stop="
-                  (dialog = true),
-                    (downloadAll = true),
-                    (checked = true),
-                    allCheckedBtn()
-                "
-                >전체 다운로드</v-btn
+                @click="sectionModal = true"
+                >구간 다운로드</v-btn
               >
             </v-col>
             <v-col cols="4">
@@ -138,7 +124,7 @@
                 height="40"
                 dark
                 small
-                @click.stop="(dialog = true), (download = true)"
+                @click="submitChoiceBtn()"
                 depressed
               >
                 선택 다운로드
@@ -149,9 +135,9 @@
                 height="40"
                 width="140"
                 color="error white--text font-weight-bold"
-                @click="countDialog = true"
+                @click="randomModal = true"
                 small
-                >수량 다운로드</v-btn
+                >랜덤 다운로드</v-btn
               >
             </v-col>
           </v-row>
@@ -160,98 +146,38 @@
           </p>
         </div>
 
-        <div class="text-center">
-          <!-- 다운로드 다이얼로그 -->
-          <v-dialog v-model="dialog" width="800">
-            <v-card width="100%">
-              <v-card-title>
-                <!-- 선택된 {{ checkList.length }}개의 파일을 다운로드 하시겠습니까? -->
-              </v-card-title>
-
-              <v-card-text class="font-weight-bold grey--text mb-2">
-                파일의 개수 및 사용자의 네트워크 상태에 따라 소요시간이 길어질
-                수 있습니다. (평균 10분 미만)
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-
-                <v-btn color="green darken-1" text @click="dialog = false">
-                  취소
-                </v-btn>
-
-                <v-btn
-                  color="green darken-1"
-                  text
-                  @click="
-                    ((dialog = false), (dialog2 = true)),
-                      download ? downloadChecked() : downloadAllChecked()
-                  "
-                >
-                  확인
-                </v-btn>
-              </v-card-actions>
-            </v-card>
+        <!-- modal zone -->
+        <template class="modal-zone">
+          <v-dialog width="500" v-model="randomModal">
+            <randomModal @hide="randomModal = false" @show="randomDownload" />
           </v-dialog>
 
-          <!-- 수량다운로드 다이얼로그-->
-          <v-dialog v-model="countDialog" width="500">
-            <v-card>
-              <v-card-title class="text-h5 grey lighten-2">
-                수량 다운로드
-              </v-card-title>
-
-              <v-card-text>
-                <v-form ref="form" lazy-validation>
-                  <v-text-field
-                    v-model="countNumber"
-                    label="개수"
-                    :rules="rules"
-                    hide-details="auto"
-                    type="number"
-                  ></v-text-field>
-                  <v-card-text>
-                    원하는 수량 입력 후 입력 수만큼 다운로드 받을 수 있습니다.
-                  </v-card-text>
-                </v-form>
-              </v-card-text>
-
-              <v-divider></v-divider>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="primary"
-                  text
-                  @click="(countDialog = false), (dialog2 = true), countNum()"
-                >
-                  다운로드
-                </v-btn>
-              </v-card-actions>
-            </v-card>
+          <v-dialog v-model="choiceModal" persistent width="800">
+            <choiceModal
+              :title="title"
+              :content="content"
+              @submit="downloadZip()"
+              @hide="choiceModal = false"
+            />
           </v-dialog>
 
-          <v-dialog
-            v-model="dialog2"
-            width="500"
-            persistent
-            class="justify-center"
-          >
-            <v-card width="100%" height="8%">
-              <v-card-actions>
-                <v-progress-circular
-                  :size="30"
-                  color="primary"
-                  indeterminate
-                ></v-progress-circular>
-
-                <v-card-text class="font-weight-bold grey--text">
-                  파일을 압축중입니다...
-                </v-card-text>
-              </v-card-actions>
-            </v-card>
+          <v-dialog v-model="alertModal" width="600" height="200">
+            <alertModal :title="title" :content="content" @hide="hideModal()" />
           </v-dialog>
-        </div>
+
+          <v-dialog v-model="circularModal" persistent width="500">
+            <circularModal :content="circularContent" />
+          </v-dialog>
+
+          <v-dialog v-model="sectionModal" persistent width="600">
+            <sectionModal
+              @show="sectionDownload"
+              @hide="hideModal"
+              :total="learningList.length > 0 ? learningList[0].total_count : 0"
+            />
+          </v-dialog>
+        </template>
+        <!-- modal zone end. -->
       </div>
     </template>
   </div>
@@ -264,12 +190,30 @@ import Spinner from '@/components/Spinner/Spinner.vue';
 import { saveAs } from 'file-saver';
 import JSZipUtils from 'jszip-utils';
 import infiniteLoading from 'vue-infinite-loading';
-import { getLearningList } from '@/api/index';
-import axios from 'axios';
+import {
+  getLearningList,
+  setHistoryData,
+  getLearningSectionList,
+  getLearningRandomList,
+} from '@/api/index';
+import choiceModal from '../../components/Modal/choiceModal.vue';
+import circularModal from '../../components/Modal/circularModal.vue';
+import alertModal from '../../components/Modal/alertModal.vue';
+import sectionModal from '../../components/Modal/sectionModal.vue';
+import randomModal from '../../components/Modal/randomModal.vue';
 
 export default {
-  components: { ImageViewer, infiniteLoading, Spinner },
-  props: ['list', 'formParams'],
+  components: {
+    ImageViewer,
+    infiniteLoading,
+    Spinner,
+    choiceModal,
+    circularModal,
+    alertModal,
+    sectionModal,
+    randomModal,
+  },
+  props: ['formParams'],
 
   filters: {
     comma(val) {
@@ -278,34 +222,37 @@ export default {
   },
   data() {
     return {
-      isLoading: false,
-      learningList: '',
-      textImg: require('../../assets/img/textIcon.png'),
-      imageImg: require('../../assets/img/imageIcon.png'),
-
+      historyForm: {
+        dataName: [],
+        userId: this.$store.state.userId,
+        listName: '학습',
+      },
+      title: '',
+      content: '',
+      circularContent: '파일을 압축중입니다...',
       viewerData: [],
       checkList: [],
+      learningList: [],
       selected: '',
       viewerChange: false,
-      dialog: false,
-      dialog2: false,
-      download: false,
-      downloadAll: false,
       checked: false,
-      countDialog: false,
+      choiceModal: false,
+      alertModal: false,
+      circularModal: false,
+      randomModal: false,
+      sectionModal: false,
       countNumber: '',
       search: '',
       rules: [
         value => !!value || '1이상 입력해주세요. 숫자만 입력 가능합니다.',
         value => (value && value.length >= 1) || 'Min 3 characters',
       ],
-      // url: 'http://124.194.100.230:10002',
+      textImg: require('../../assets/img/textIcon.png'),
+      imageImg: require('../../assets/img/imageIcon.png'),
+      isLoading: false,
     };
   },
   computed: {
-    totalCount() {
-      return this.list[0].total_count;
-    },
     url() {
       return this.$store.state.url;
     },
@@ -326,6 +273,87 @@ export default {
         this.$emit('hide');
       }
     },
+
+    async sectionDownload(section) {
+      this.hideModal();
+      this.formParams.startNumber = section.start;
+      this.formParams.endNumber = section.end;
+      this.circularContent = '압축 할 데이터를 받아오는중입니다...';
+      this.circularModal = true;
+
+      const { data } = await getLearningSectionList(this.formParams);
+      if (!section.xlsx) {
+        await this.downloadZip(data);
+      } else {
+        this.downloadExcel(data);
+      }
+    },
+
+    async randomDownload(random) {
+      this.hideModal();
+      this.formParams.randomNumber = random.randomNum;
+      this.circularContent = '압축 할 데이터를 받아오는중입니다...';
+      this.circularModal = true;
+      const { data } = await getLearningRandomList(this.formParams);
+      if (!random.xlsx) {
+        await this.downloadZip(data);
+      } else {
+        this.downloadExcel(data);
+      }
+    },
+
+    async setHistoryData() {
+      try {
+        await setHistoryData(JSON.stringify(this.historyForm));
+        this.historyForm.dataName = [];
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    downloadExcel(data) {
+      let csv = [];
+      let row = [];
+
+      data.forEach(e => {
+        row = [];
+        row.push(e.path_nm + e.file_nm);
+        csv.push(row.join(','));
+      });
+
+      this.downloadCSV(csv.join('\n'));
+      this.hideModal();
+    },
+
+    downloadCSV(csv) {
+      const BOM = '\uFEFF';
+      csv = BOM + csv;
+      let filename = 'LX_learning_data';
+
+      let csvFile = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      let downloadLink = document.createElement('a');
+      downloadLink.download = filename;
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      this.hideModal();
+    },
+
+    submitChoiceBtn() {
+      if (this.checkList.length <= 0) {
+        this.title = '선택 된 파일이 없습니다.';
+        this.content = '다운로드 할 파일을 1개 이상 선택 후 다시 시도해주세요.';
+        this.alertModal = true;
+      } else {
+        this.title = `${this.checkList.length}개의 파일을 다운로드 하시겠습니까?`;
+        this.content =
+          '파일의 개수 및 사용자의 네트워크 상태에 따라 소요시간이 길어질 수 있습니다.';
+        this.choiceModal = true;
+      }
+    },
+
     setViewerData(data) {
       this.viewerChange = true;
       this.viewerData = data;
@@ -343,7 +371,10 @@ export default {
       });
     },
 
-    downloadChecked(data) {
+    downloadZip(data) {
+      this.hideModal();
+      this.circularContent = '파일을 압축중입니다...';
+      this.circularModal = true;
       this.$nextTick(async () => {
         const files = [];
         if (!data) {
@@ -374,16 +405,17 @@ export default {
                 name: item.json_file_nm,
                 url: this.url + item.json_file_path + item.json_file_nm,
               });
+              this.historyForm.dataName.push(item.file_nm);
             } else {
               files.push({
                 name: item.json_file_nm,
                 url: this.url + item.json_file_path + item.json_file_nm,
               });
-
               files.push({
                 name: item.image_file_nm,
                 url: this.url + item.image_file_path + item.image_file_nm,
               });
+              this.historyForm.dataName.push(item.file_nm);
             }
           });
         } else {
@@ -393,7 +425,6 @@ export default {
                 name: item.image_file_nm,
                 url: this.url + item.image_file_path + item.image_file_nm,
               });
-
               files.push({
                 name: item.labl_mask_imag_file_nm,
                 url:
@@ -401,7 +432,6 @@ export default {
                   item.labl_mask_imag_file_path +
                   item.labl_mask_imag_file_nm,
               });
-
               files.push({
                 name: item.insn_mask_imag_file_nm,
                 url:
@@ -409,21 +439,23 @@ export default {
                   item.insn_mask_imag_file_path +
                   item.insn_mask_imag_file_nm,
               });
-
               files.push({
                 name: item.json_file_nm,
                 url: this.url + item.json_file_path + item.json_file_nm,
               });
+
+              this.historyForm.dataName.push(item.file_nm);
             } else {
               files.push({
                 name: item.json_file_nm,
                 url: this.url + item.json_file_path + item.json_file_nm,
               });
-
               files.push({
                 name: item.image_file_nm,
                 url: this.url + item.image_file_path + item.image_file_nm,
               });
+
+              this.historyForm.dataName.push(item.file_nm);
             }
           });
         }
@@ -437,68 +469,20 @@ export default {
           try {
             const binary = await this.urlToPromise(item.url);
             zip.file(item.name, binary, { binary: true });
-            let requestData = `&listNm=학습&dataNm=${item.file_nm}&utlzUserId=${this.loginUserId}`;
-            axios.post(`/rest/api/historyList?${requestData}`);
-            // this.setReportData(item.fileNm);
           } catch (err) {
             console.log(err);
           }
         }
         await zip.generateAsync({ type: 'blob' }).then(blob => {
           saveAs(blob, 'LearningData.zip');
-          this.dialog2 = false;
-          this.download = false;
         });
+        this.setHistoryData();
+        this.circularModal = false;
       });
     },
 
-    // downloadChecked() {
-    //   this.$nextTick(async () => {
-    //     const files = [];
-    //     this.checkList.forEach(item => {
-    //       files.push({
-    //         name: item.image_file_nm,
-    //         url: this.url + `test/camera/` + item.image_file_nm,
-    //       });
-
-    //       files.push({
-    //         name: item.labl_mask_imag_file_nm,
-    //         url: this.urls + `test/label/` + item.labl_mask_imag_file_nm,
-    //       });
-
-    //       files.push({
-    //         name: item.insn_mask_imag_file_nm,
-    //         url: this.urls + `test/instance/` + item.insn_mask_imag_file_nm,
-    //       });
-
-    //       files.push({
-    //         name: item.json_file_nm,
-    //         url: this.urls + `test/json/` + item.json_file_nm,
-    //       });
-    //     });
-
-    //     const fileset = new Set();
-    //     for (const item of files) {
-    //       fileset.add(item);
-    //     }
-    //     const zip = new JSZip();
-    //     for (const item of fileset) {
-    //       try {
-    //         const binary = await this.urlToPromise(item.url);
-    //         zip.file(item.name, binary, { binary: true });
-    //         // this.setReportData(item.fileNm);
-    //       } catch (err) {
-    //         console.log(err);
-    //       }
-    //     }
-    //     await zip.generateAsync({ type: 'blob' }).then(blob => {
-    //       saveAs(blob, 'SensorData.zip');
-    //       this.dialog2 = false;
-    //     });
-    //   });
-    // },
-
     async infiniteHandler($state) {
+      this.formParams.page += 1;
       const { data } = await getLearningList(this.formParams);
       this.learningList = this.learningList.concat(data);
       console.log(data.length);
@@ -519,101 +503,12 @@ export default {
       }
     },
 
-    async countNum() {
-      this.search = '';
-      if (this.formParams.startDate) {
-        let convertDate = this.formParams.startDate.substring(
-          2,
-          this.formParams.startDate.length,
-        );
-        this.search += `&startDate=${convertDate}`;
-      }
-      if (this.formParams.endDate) {
-        let convertDate = this.formParams.endDate.substring(
-          2,
-          this.formParams.endDate.length,
-        );
-        this.search += `&endDate=${convertDate}`;
-      }
-      if (this.formParams.lowVelocity == '') this.search += `&lowVelocity=0`;
-      else if (this.formParams.lowVelocity > 0)
-        this.search += `&lowVelocity=${this.formParams.lowVelocity}`;
-      if (this.formParams.highVelocity)
-        this.search += `&highVelocity=${this.formParams.highVelocity}`;
-      if (this.formParams.sunlight)
-        this.search += `&sunlight=${this.formParams.sunlight}`;
-      if (this.formParams.weather)
-        this.search += `&weather=${this.formParams.weather}`;
-      if (this.formParams.conditions)
-        this.search += `&conditions=${this.formParams.conditions}`;
-      if (this.formParams.environment1 && !this.formParams.environment2)
-        this.search += `&environment1=${this.formParams.environment1}`;
-      else if (this.formParams.environment2)
-        this.search += `&environment2=${this.formParams.environment2}`;
-      if (this.formParams.location)
-        this.search += `&location=${this.formParams.location}`;
-      if (this.formParams.learningType)
-        this.search += `&learningType=${this.formParams.learningType}`;
-      this.search += `&countNumber=${this.countNumber}`;
-
-      for (var i = 0; i < this.formParams.move.length; i++) {
-        switch (this.formParams.move[i].name) {
-          case '사람':
-            this.search += `&person=사람`;
-            break;
-          case '승용차':
-            this.search += `&car=승용차`;
-            break;
-          case '버스':
-            this.search += `&bus=버스`;
-            break;
-          case '트럭':
-            this.search += '&truck=트럭';
-            break;
-          case '오토바이':
-            this.search += '&motorCycle=오토바이';
-            break;
-          case '특수차':
-            this.search += '&specialCar=특수차';
-            break;
-        }
-      }
-
-      for (var j = 0; j < this.formParams.fixed.length; j++) {
-        switch (this.formParams.fixed[j].name) {
-          case '정지선':
-            this.search += `&stopLine=정지선`;
-            break;
-          case '횡단보도':
-            this.search += `&crossWalk=횡단보도`;
-            break;
-          case '방지턱':
-            this.search += `&bump=방지턱`;
-            break;
-          case '공사중':
-            this.search += '&construction=트럭';
-            break;
-          case '신호등':
-            this.search += '&traffic=신호등';
-            break;
-        }
-      }
-
-      const { data } = await getLearningList(this.search, 1);
-      this.downloadChecked(data);
-      console.log(data);
-    },
-
-    allCheckedBtn() {
-      this.checkList = [];
-      for (let i in this.list) {
-        this.checkList.push(this.list[i]);
-      }
-    },
-
-    downloadAllChecked() {
-      this.downloadAll = false;
-      this.downloadChecked();
+    hideModal() {
+      this.alertModal = false;
+      this.choiceModal = false;
+      this.sectionModal = false;
+      this.circularModal = false;
+      this.randomModal = false;
     },
   },
 };
@@ -641,7 +536,7 @@ export default {
 
 .viewer {
   margin-top: 20px;
-  height: 800px;
+  min-height: 550px;
   width: 700px;
   position: fixed;
   top: 0;

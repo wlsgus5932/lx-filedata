@@ -205,7 +205,6 @@ import SensorList from '@/views/SideBarView/SensorList.vue';
 import choiceModal from '../Modal/choiceModal.vue';
 import circularModal from '../../components/Modal/circularModal.vue';
 import alertModal from '../../components/Modal/alertModal.vue';
-// import eventBus from '@/eventBus/eventBus';
 
 export default {
   components: {
@@ -291,10 +290,10 @@ export default {
 
       conditionsCodes: [
         { name: '전체', code: '' },
-        { name: '일반상황', code: 'C00500003' },
-        { name: '일반상황/공사상황', code: 'C00500004' },
-        { name: '긴급상황(사람난입)', code: 'C00500002' },
         { name: '긴급상황(도로위 물체)', code: 'C00500001' },
+        { name: '긴급상황(사람난입)', code: 'C00500002' },
+        { name: '일반상황', code: 'C00500003' },
+        { name: '공사상황', code: 'C00500004' },
       ],
     };
   },
@@ -303,7 +302,6 @@ export default {
     submitForm() {
       this.showSensorList = true;
       this.formParams.page = 1;
-      // this.circularModal = true;
       this.$nextTick(() => {
         this.$refs.sensor.submitForm();
       });
@@ -355,12 +353,10 @@ export default {
       }
     },
     startDateChange(startDate) {
-      // this.formParams.startDate = startDate.substring(2, startDate.length);
       this.formParams.startDate = startDate;
     },
 
     endDateChange(endDate) {
-      // this.formParams.endDate = endDate.substring(2, endDate.length);
       this.formParams.endDate = endDate;
     },
 

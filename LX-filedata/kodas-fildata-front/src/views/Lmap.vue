@@ -63,7 +63,6 @@ export default {
       selectZone: [],
       colorChange: [],
       nestingChecked: false,
-      // url: 'http://124.194.100.230:10002',
     };
   },
 
